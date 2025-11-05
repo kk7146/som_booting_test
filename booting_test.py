@@ -45,7 +45,7 @@ def schedule_repulse():
     global repulse_timer
     if repulse_timer and repulse_timer.is_alive():
         repulse_timer.cancel()
-    repulse_timer = threading.Timer(REPULSE_DELAY_SEC, lambda: pulse_high_then_low("Repulse ({REPULSE_DELAY_SEC} SEC)"))
+    repulse_timer = threading.Timer(REPULSE_DELAY_SEC, lambda: pulse_high_then_low("Repulse"))
     repulse_timer.daemon = True
     repulse_timer.start()
 

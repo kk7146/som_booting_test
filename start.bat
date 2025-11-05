@@ -1,0 +1,1 @@
+sudo python3 booting_test.py

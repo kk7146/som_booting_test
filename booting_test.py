@@ -32,12 +32,12 @@ def cancel_timers():
 def pulse_high_then_low(reason: str):
     global off_timer
     out.off()
-    print(f"[{datetime.now()}] {reason}: GPIO HIGH")
+    print(f"[{datetime.now()}] {reason}: GPIO LOW")
 
     if off_timer and off_timer.is_alive():
         off_timer.cancel()
 
-    off_timer = threading.Timer(PULSE_SEC, lambda: (out.on(), print(f"[{datetime.now()}] GPIO LOW")))
+    off_timer = threading.Timer(PULSE_SEC, lambda: (out.on(), print(f"[{datetime.now()}] GPIO HIGH")))
     off_timer.daemon = True
     off_timer.start()
 

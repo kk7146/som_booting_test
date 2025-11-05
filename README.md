@@ -19,11 +19,11 @@ PULSE_SEC = 1.0
 REPULSE_DELAY_SEC = 3 * 60
 ALARM_SEC = 7 * 60
 ```
-GPIO_PIN : 사용할 핀
-SOM_IP : 특정 송신 IP만 허용하려면 "192.168.x.x"
-PULSE_SEC : Low 유지 길이(초)
-REPULSE_DELAY_SEC : 펄스 재전송 타이밍
-ALARM_SEC : SoM 부팅되지 않거나, 랜선 연결이 안되는 것을 판단하기 위한 시간
+GPIO_PIN : 사용할 핀  
+SOM_IP : 특정 송신 IP만 허용하려면 "192.168.x.x"  
+PULSE_SEC : Low 유지 길이(초)  
+REPULSE_DELAY_SEC : 펄스 재전송 타이밍  
+ALARM_SEC : SoM 부팅되지 않거나, 랜선 연결이 안되는 것을 판단하기 위한 시간  
 
 ## 실행
 ```bash

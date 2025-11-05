@@ -31,13 +31,13 @@ def cancel_timers():
 
 def pulse_high_then_low(reason: str):
     global off_timer
-    out.on()
+    out.off()
     print(f"[{datetime.now()}] {reason}: GPIO HIGH")
 
     if off_timer and off_timer.is_alive():
         off_timer.cancel()
 
-    off_timer = threading.Timer(PULSE_SEC, lambda: (out.off(), print(f"[{datetime.now()}] GPIO LOW")))
+    off_timer = threading.Timer(PULSE_SEC, lambda: (out.on(), print(f"[{datetime.now()}] GPIO LOW")))
     off_timer.daemon = True
     off_timer.start()
 
@@ -81,6 +81,7 @@ def cleanup(*_):
 
 def main():
     print("Sniffing ICMP echo requests...")
+    out.on()
     bpf = "icmp and icmp[icmptype] = icmp-echo"
     if SOM_IP:
         bpf += f" and src host {SOM_IP}"

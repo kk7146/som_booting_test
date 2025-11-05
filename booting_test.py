@@ -29,7 +29,7 @@ def cancel_timers():
     off_timer = None
     repulse_timer = None
 
-def pulse_high_then_low(reason: str):
+def pulse_low_then_high(reason: str):
     global off_timer
     out.off()
     print(f"[{datetime.now()}] {reason}: GPIO LOW")
@@ -45,7 +45,7 @@ def schedule_repulse():
     global repulse_timer
     if repulse_timer and repulse_timer.is_alive():
         repulse_timer.cancel()
-    repulse_timer = threading.Timer(REPULSE_DELAY_SEC, lambda: pulse_high_then_low("Repulse"))
+    repulse_timer = threading.Timer(REPULSE_DELAY_SEC, lambda: pulse_low_then_high("Repulse"))
     repulse_timer.daemon = True
     repulse_timer.start()
 
@@ -64,7 +64,7 @@ def on_ping(pkt):
         with lock:
             last_ping_time = datetime.now()
 
-        pulse_high_then_low(f"Ping from {pkt[IP].src}")
+        pulse_low_then_high(f"Ping from {pkt[IP].src}")
 
         schedule_repulse()
 

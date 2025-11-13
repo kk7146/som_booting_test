@@ -27,7 +27,7 @@ ALARM_SEC : SoM 부팅되지 않거나, 랜선 연결이 안되는 것을 판단
 
 ## 실행
 ```bash
-sh start.sh
+sudo sh start.sh
 ```
 
 ## 사용한 GPIO 핀

@@ -11,7 +11,6 @@ SOM_IP = None
 PULSE_SEC = 1.0
 DELAY_BEFORE_PULSE_SEC = 10.0
 SECOND_PULSE_DELAY_SEC = 120.0
-REPULSE_DELAY_SEC = 3 * 60
 ALARM_SEC = 7 * 60
 
 out = OutputDevice(GPIO_PIN, active_high=True, initial_value=False)
@@ -21,7 +20,6 @@ last_accept_time = None
 
 alarm_timer = None
 off_timer = None
-repulse_timer = None
 delay_pulse_timer = None
 second_pulse_timer = None
 
@@ -30,11 +28,11 @@ counter = 0
 lock = threading.Lock()
 
 def cancel_timers():
-    global alarm_timer, off_timer, repulse_timer, delay_pulse_timer, second_pulse_timer
-    for t in (alarm_timer, off_timer, repulse_timer, delay_pulse_timer, second_pulse_timer):
+    global alarm_timer, off_timer, delay_pulse_timer, second_pulse_timer
+    for t in (alarm_timer, off_timer, delay_pulse_timer, second_pulse_timer):
         if t and t.is_alive():
             t.cancel()
-    alarm_timer = off_timer = repulse_timer = delay_pulse_timer = second_pulse_timer = None
+    alarm_timer = off_timer = delay_pulse_timer = second_pulse_timer = None
 
 def pulse_low_then_high(reason: str):
     global off_timer
@@ -52,20 +50,8 @@ def pulse_low_then_high(reason: str):
     off_timer.daemon = True
     off_timer.start()
 
-def schedule_repulse():
-    global repulse_timer
-    if repulse_timer and repulse_timer.is_alive():
-        repulse_timer.cancel()
-    repulse_timer = threading.Timer(
-        REPULSE_DELAY_SEC,
-        lambda: pulse_low_then_high("Repulse")
-    )
-    repulse_timer.daemon = True
-    repulse_timer.start()
-
 def delayed_pulse_10s():
     pulse_low_then_high("Delayed pulse (+10s)")
-    schedule_repulse()
 
 def delayed_pulse_120s():
     pulse_low_then_high("Delayed pulse (+120s)")

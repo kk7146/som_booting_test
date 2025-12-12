@@ -96,9 +96,10 @@ def on_ping(pkt):
 
         last_accept_time = now
         print(f"[{now}] First ping accepted from {pkt[IP].src}")
-        
+
+        global counter
         counter += 1
-        ptint(f"[{now}] Ping count: {counter}")
+        print(f"[{now}] Ping count: {counter}")
 
         if delay_pulse_timer and delay_pulse_timer.is_alive():
             delay_pulse_timer.cancel()

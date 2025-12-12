@@ -36,7 +36,7 @@ def setup_logger() -> tuple[logging.Logger, str]:
     log_root = "./logs"
     os.makedirs(log_root, exist_ok=True)
 
-    user_name = input("로그 파일 이름을 입력하세요: ")
+    user_name = input("Enter log file name : ")
     base = sanitize_name(user_name)
 
     log_path = os.path.join(log_root, f"{base}")
@@ -50,7 +50,6 @@ def setup_logger() -> tuple[logging.Logger, str]:
     ch.setLevel(logging.INFO)
     ch.setFormatter(fmt)
 
-    # 파일 출력(로깅)
     fh = logging.FileHandler(log_path, encoding="utf-8")
     fh.setLevel(logging.INFO)
     fh.setFormatter(fmt)
@@ -58,8 +57,6 @@ def setup_logger() -> tuple[logging.Logger, str]:
     lg.handlers.clear()
     lg.addHandler(ch)
     lg.addHandler(fh)
-
-    # 콘솔 중복 출력 방지(루트 로거 전파 차단)
     lg.propagate = False
 
     return lg, log_path
@@ -98,6 +95,7 @@ def check_no_ping():
         ts = last_accept_time
     if ts is not None:
         logger.info("WARNING: No ping")
+        cleanup()
 
 def on_ping(pkt):
     global last_ping_time, last_accept_time
@@ -145,9 +143,10 @@ def on_ping(pkt):
 
 def cleanup(*_):
     cancel_timers()
-    out.off()
+    out.on()
     logger.info("Exiting")
-    sys.exit(0)
+    logging.shutdown()
+    os._exit(0)
 
 def main():
     global logger

@@ -4,7 +4,7 @@
 ## 동작 요약
 
 * 핑 수신 즉시: GPIO HIGH → 10초 후 LOW
-* 마지막 핑 + 3분 후: 자동 재펄스(1초)
+* 마지막 핑 + 2분 후: 자동 재펄스(1초)
 * 마지막 핑 + 7분 무응답: 경고 로그 출력
 * `SOM_IP`를 설정하면 해당 소스 IP에서 온 핑만 처리
 
@@ -15,14 +15,17 @@
 ```python
 GPIO_PIN = 17
 SOM_IP = None
+
 PULSE_SEC = 1.0
-REPULSE_DELAY_SEC = 3 * 60
+DELAY_BEFORE_PULSE_SEC = 10.0
+SECOND_PULSE_DELAY_SEC = 120.0
 ALARM_SEC = 7 * 60
 ```
 GPIO_PIN : 사용할 핀  
 SOM_IP : 특정 송신 IP만 허용하려면 "192.168.x.x"  
-PULSE_SEC : Low 유지 길이(초)  
-REPULSE_DELAY_SEC : 펄스 재전송 타이밍  
+PULSE_SEC : Low 유지 길이(초)
+DELAY_BEFORE_PULSE_SEC : off 신호 전송 타이밍
+SECOND_PULSE_DELAY_SEC : on 신호 전송 타이밍
 ALARM_SEC : SoM 부팅되지 않거나, 랜선 연결이 안되는 것을 판단하기 위한 시간  
 
 ## 실행

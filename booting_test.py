@@ -28,32 +28,41 @@ second_pulse_timer = None
 counter = 0
 lock = threading.Lock()
 
-PROGRAM_START_DT = datetime.now()
-LOG_DATE_DIR = PROGRAM_START_DT.strftime("%Y%m%d")
-LOG_FILE_TS = PROGRAM_START_DT.strftime("%Y%m%d_%H%M%S")
+def sanitize_name(name: str) -> str:
+    safe = "".join(c for c in name.strip() if c.isalnum() or c in ("-", "_"))
+    return safe if safe else "default"
 
-LOG_ROOT = "./logs"
-LOG_DIR = os.path.join(LOG_ROOT, LOG_DATE_DIR)
-os.makedirs(LOG_DIR, exist_ok=True)
+def setup_logger() -> tuple[logging.Logger, str]:
+    log_root = "./logs"
+    os.makedirs(log_root, exist_ok=True)
 
-LOG_PATH = os.path.join(LOG_DIR, f"{LOG_FILE_TS}.log")
+    user_name = input("로그 파일 이름을 입력하세요: ")
+    base = sanitize_name(user_name)
 
-logger = logging.getLogger("ping_gpio")
-logger.setLevel(logging.INFO)
+    log_path = os.path.join(log_root, f"{base}")
 
-fmt = logging.Formatter("[%(asctime)s] %(message)s")
+    lg = logging.getLogger("ping_gpio")
+    lg.setLevel(logging.INFO)
 
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.INFO)
-ch.setFormatter(fmt)
+    fmt = logging.Formatter("[%(asctime)s] %(message)s")
 
-fh = logging.FileHandler(LOG_PATH, encoding="utf-8")
-fh.setLevel(logging.INFO)
-fh.setFormatter(fmt)
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(fmt)
 
-logger.handlers.clear()
-logger.addHandler(ch)
-logger.addHandler(fh)
+    # 파일 출력(로깅)
+    fh = logging.FileHandler(log_path, encoding="utf-8")
+    fh.setLevel(logging.INFO)
+    fh.setFormatter(fmt)
+
+    lg.handlers.clear()
+    lg.addHandler(ch)
+    lg.addHandler(fh)
+
+    # 콘솔 중복 출력 방지(루트 로거 전파 차단)
+    lg.propagate = False
+
+    return lg, log_path
 
 def cancel_timers():
     global alarm_timer, off_timer, delay_pulse_timer, second_pulse_timer
@@ -65,17 +74,16 @@ def cancel_timers():
 def pulse_low_then_high(reason: str):
     global off_timer
     out.off()
-    logger.info(f"[{datetime.now()}] {reason}")
-    logger.info(f"[{datetime.now()}] GPIO LOW")
+    logger.info(reason)
+    logger.info("GPIO LOW")
 
     if off_timer and off_timer.is_alive():
         off_timer.cancel()
 
-    def _set_high():
-        out.on()
-        logger.info(f"[{datetime.now()}] GPIO HIGH")
-
-    off_timer = threading.Timer(PULSE_SEC, _set_high)
+    off_timer = threading.Timer(
+        PULSE_SEC,
+        lambda: (out.on(), logger.info("GPIO HIGH"))
+    )
     off_timer.daemon = True
     off_timer.start()
 
@@ -89,7 +97,7 @@ def check_no_ping():
     with lock:
         ts = last_accept_time
     if ts is not None:
-        logger.info(f"[{datetime.now()}] WARNING: No ping")
+        logger.info("WARNING: No ping")
 
 def on_ping(pkt):
     global last_ping_time, last_accept_time
@@ -105,15 +113,16 @@ def on_ping(pkt):
 
     with lock:
         last_ping_time = now
+
         if last_accept_time is not None:
             if (now - last_accept_time).total_seconds() < DELAY_BEFORE_PULSE_SEC:
                 return
 
         last_accept_time = now
-        logger.info(f"[{now}] First ping accepted from {pkt[IP].src}")
+        logger.info(f"First ping accepted from {pkt[IP].src}")
 
         counter += 1
-        logger.info(f"[{now}] Ping count: {counter}")
+        logger.info(f"Ping count: {counter}")
 
         if delay_pulse_timer and delay_pulse_timer.is_alive():
             delay_pulse_timer.cancel()
@@ -137,12 +146,15 @@ def on_ping(pkt):
 def cleanup(*_):
     cancel_timers()
     out.off()
-    logger.info(f"[{datetime.now()}] Exiting")
+    logger.info("Exiting")
     sys.exit(0)
 
 def main():
-    print("Sniffing ICMP echo requests...")
-    logger.info(f"[{datetime.now()}] Log file: {LOG_PATH}")
+    global logger
+    logger, log_path = setup_logger()
+
+    logger.info(f"Log file: {log_path}")
+    logger.info("Sniffing ICMP echo requests...")
 
     out.on()
 

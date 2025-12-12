@@ -34,7 +34,7 @@ sudo sh start.sh
 ```
 
 ## 사용한 GPIO 핀
-17번 핀
+11번 핀 (GPIO 17번 핀)
 <img width="1157" height="640" alt="image" src="https://github.com/user-attachments/assets/48901a1f-5244-4293-9ff2-9458e7162703" />
 
 
